@@ -63,54 +63,47 @@ app.post('/login', passport.authenticate('local', { failureRedirect: '/login' })
 });
 
 app.get('/login', function(req, res) {
-  res.send(`
-    <form action="/login" method="post">
-      <div>
-        <label>Email:</label>
-        <input type="email" name="email">
-      </div>
-      <div>
-        <label>Password:</label>
-        <input type="password" name="password">
-      </div>
-      <div>
-        <input type="submit" value="Log In">
-      </div>
-    </form>
-  `);
-});
-
-app.get('/dashboard', function(req, res) {
-    if (req.isAuthenticated()) {
-      res.render('dashboard', {
-        name: req.user.name,
-      });
+    if(req.isAuthenticated()) {
+        res.redirect('/dashboard');
     } else {
-      res.redirect('/login');
+        res.send(`
+        <form action="/login" method="post">
+        <div>
+            <label>Email:</label>
+            <input type="email" name="email">
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type="password" name="password">
+        </div>
+        <div>
+            <input type="submit" value="Log In">
+        </div>
+        </form>
+        <a href="/register">REGISTER</a>
+        `);
     }
 });
 
-// app.get('/dashboard', ensureAuthenticated, function(req, res) {
-//     const studentId = req.user.id;
-  
-//     // Count the number of attendance records for the current student
-//     const stmt = db.prepare("SELECT COUNT(*) AS count FROM attendance WHERE student_id = ?");
-//     stmt.get(studentId, function(err, row) {
-//       if (err) {
-//         console.error(err);
-//         res.status(500).send('Internal server error');
-//       } else {
-//         // Render the dashboard template with the student's name and attendance count
-//         res.render('dashboard', {
-//           name: req.user.name,
-//           attendanceCount: row.count
-//         });
-//       }
-//     });
-//     stmt.finalize();
-// });
-  
-  
+app.get('/dashboard', ensureAuthenticated, function(req, res) {
+    const studentId = req.user.id;
+    // Count the number of attendance records for the current student
+    const stmt = db.prepare("SELECT COUNT(*) AS total, COUNT(CASE WHEN is_present = 'true' THEN 1 END) AS attended FROM attendance WHERE student_id = ?");
+    stmt.get(studentId, function(err, row) {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Internal server error');
+      } else {
+        // Render the dashboard template with the student's name and attendance count
+        res.render('dashboard', {
+          name: req.user.name,
+          attendanceCount: row.attended,
+          totalAttendance: row.total
+        });
+      }
+    });
+    stmt.finalize();
+});
 
 app.get('/', function(req, res) {
     res.redirect('/login');
@@ -196,21 +189,6 @@ function ensureAuthenticated(req, res, next) {
       res.redirect('/login');
     }
 }
-
-function getDashboard(req, res) {
-  const studentId = req.user.id;
-
-  db.get("SELECT COUNT(*) AS count FROM attendance WHERE student_id = ?", studentId, function(err, row) {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Internal server error');
-    } else {
-      const count = row.count;
-      res.render('dashboard', { count: count });
-    }
-  });
-}
-
 
 db.serialize(function() {
   db.run("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT)");
