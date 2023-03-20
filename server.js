@@ -10,9 +10,9 @@ const {engine} = require('express-handlebars');
 const app = express();
 const port = 3000;
 
-app.engine('.hbs', engine({ extname: '.hbs',defaultLayout:false,layoutsDir:'views'}));
+app.engine('.hbs', engine({ extname: '.hbs',defaultLayout:false,layoutsDir:'public'}));
 app.set("view engine", "hbs");
-// app.use(express.static('public'));
+app.use(express.static(__dirname + '/views'));
 // app.set('views', __dirname + '\\views');
 
 app.use(express.urlencoded({ extended: true }));
@@ -66,22 +66,7 @@ app.get('/login', function(req, res) {
     if(req.isAuthenticated()) {
         res.redirect('/dashboard');
     } else {
-        res.send(`
-        <form action="/login" method="post">
-        <div>
-            <label>Email:</label>
-            <input type="email" name="email">
-        </div>
-        <div>
-            <label>Password:</label>
-            <input type="password" name="password">
-        </div>
-        <div>
-            <input type="submit" value="Log In">
-        </div>
-        </form>
-        <a href="/register">REGISTER</a>
-        `);
+        res.render("login");
     }
 });
 
@@ -105,7 +90,7 @@ app.get('/dashboard', ensureAuthenticated, function(req, res) {
     stmt.finalize();
 });
 
-app.get('/', function(req, res) {
+app.get('', function(req, res) {
     res.redirect('/login');
 });
 
@@ -119,7 +104,11 @@ app.get('/logout', function(req, res, next) {
 });
 
 app.get('/register', function(req, res) {
-    res.sendFile(__dirname + '/register.html');
+    res.render('register');
+});
+
+app.get('/index.html', function(req, res) {
+    res.redirect('/login');
 });
 
 // Route to register a new student
