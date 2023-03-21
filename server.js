@@ -170,7 +170,66 @@ app.post('/attendance', ensureAuthenticated, function(req, res) {
     });
     stmt.finalize();
 });
-  
+
+app.get('/my-profile', function(req, res) {
+    const studentId = req.user.id;
+    db.get("SELECT * FROM students WHERE id = ?", studentId, function(err, row) {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Internal server error');
+        } else {
+            console.log(`Rows updated`);
+            res.render('my-profile', {
+                name: row.name,
+                rollno: row.rollno,
+                class: row.collegeyear,
+                div: row.div
+            });
+        }
+    });
+});
+
+app.post('/edit-profile', function(req, res) {
+    const studentId = req.user.id;
+    const name = req.body.name;
+    const rollno = req.body.rollno;
+    const collegeyear = req.body.collegeyear;
+    const div = req.body.div;
+
+    const stmt = db.prepare("UPDATE students SET name = ?, rollno = ?, collegeyear = ?, div = ? WHERE id = ?");
+    stmt.run(name, rollno, collegeyear, div, studentId, function(err) {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Internal server error');
+      } else {
+        console.log(`Rows updated`);
+        res.redirect('/my-profile');
+      }
+    });
+    stmt.finalize();
+});
+
+app.get('/api/newSeries', (req, res) => {
+    const studentId = req.user.id;
+    const stmt = db.prepare("SELECT COUNT(*) AS total, COUNT(CASE WHEN is_present = 'true' THEN 1 END) AS attended FROM attendance WHERE student_id = ?");
+    let per = 0
+    stmt.get(studentId, function(err, row) {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Internal server error');
+      } else {
+        // Render the dashboard template with the student's name and attendance count
+        per = (row.attended * 100 ) / row.total
+        if (isNaN(per)) {per = 0}
+        console.log(per);
+
+        const newSeries = [per]; // new series data
+        res.json(newSeries);
+      }
+    });
+    stmt.finalize();
+});
+
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
       return next();
@@ -189,3 +248,4 @@ db.serialize(function() {
 });
 
 app.listen(port, () => console.log(`Server started on port ${port}`));
+

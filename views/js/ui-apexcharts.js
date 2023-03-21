@@ -359,10 +359,8 @@ var lineOptions = {
     },
   };
   
-
 var radialGradientOptions = {
-  
-  series: [55.5],
+  series: [50],
   chart: {
     height: 350,
     type: "radialBar",
@@ -512,17 +510,25 @@ var radialGradientOptions = {
     },
     labels: ["Apples", "Oranges", "Bananas", "Berries"],
   };
-  var bar = new ApexCharts(document.querySelector("#bar"), barOptions);
-  var line = new ApexCharts(document.querySelector("#line"), lineOptions);
-  var candle = new ApexCharts(document.querySelector("#candle"), candleOptions);
-  var radialGradient = new ApexCharts(document.querySelector("#radialGradient"), radialGradientOptions);
-  var area = new ApexCharts(document.querySelector("#area"), areaOptions);
-  
-  area.render();
-  radialGradient.render();
-  candle.render();
-  bar.render();
-  line.render();
+
+var bar = new ApexCharts(document.querySelector("#bar"), barOptions);
+var line = new ApexCharts(document.querySelector("#line"), lineOptions);
+var candle = new ApexCharts(document.querySelector("#candle"), candleOptions);
+var radialGradient = new ApexCharts(document.querySelector("#radialGradient"), radialGradientOptions);
+var area = new ApexCharts(document.querySelector("#area"), areaOptions);
+
+
+fetch('/api/newSeries')
+.then(response => response.json())
+.then(newSeries => {
+  // update the series data of your radial chart with the new data
+  radialGradient.updateSeries(newSeries);
+});
+radialGradient.render();
+area.render();
+candle.render();
+bar.render();
+line.render();
   
 
   window.Apex = {
