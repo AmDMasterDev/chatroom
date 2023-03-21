@@ -142,6 +142,16 @@ app.get('/attendance', function(req, res) {
     res.send(`
     <form method="POST" action="/attendance">
         <label>
+            Subject:
+            <select name="subject">
+              <option value="multimedia">Mutlimedia Theory</option>
+              <option value="cms">Content Management System</option>
+              <option value="iot">Internet of Things</option>
+              <option value="ecomm">E-commerce</option>
+              <option value="multimediaP">Mutlimedia Practicals</option>
+            </select>
+        </label>
+        <label>
             <input type="radio" name="isPresent" value="true" checked>
             Present
         </label>
@@ -158,9 +168,10 @@ app.post('/attendance', ensureAuthenticated, function(req, res) {
     const studentId = req.user.id;
     const date = new Date().toISOString().slice(0, 10);
     const isPresent = req.body.isPresent;
+    const subject = req.body.subject;
   
-    const stmt = db.prepare("INSERT INTO attendance (student_id, date, is_present) VALUES (?, ?, ?)");
-    stmt.run(studentId, date, isPresent, function(err) {
+    const stmt = db.prepare("INSERT INTO attendance (student_id, date, is_present, subject) VALUES (?, ?, ?, ?)");
+    stmt.run(studentId, date, isPresent, subject, function(err) {
       if (err) {
         console.error(err);
         res.status(500).send('Internal server error');
@@ -239,8 +250,10 @@ function ensureAuthenticated(req, res, next) {
 }
 
 db.serialize(function() {
-  db.run("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT)");
+  db.run("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT, rollno TEXT, collegeyear TEXT, div TEXT)");
+  db.run("CREATE TABLE IF NOT EXISTS attendance (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER, date DATE, is_present BOOLEAN, subject TEXT)")
 
+  
 //   const stmt = db.prepare("INSERT INTO students (name, email, password) VALUES (?, ?, ?)");
 //   stmt.run("John Doe", "johndoe@example.com", bcrypt.hashSync("password", 10));
 //   stmt.run("Jane Doe", "janedoe@example.com", bcrypt.hashSync("password", 10));
