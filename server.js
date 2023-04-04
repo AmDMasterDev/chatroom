@@ -1,7 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('attendance.db');
 // const expbs = require('express-handlebars');
