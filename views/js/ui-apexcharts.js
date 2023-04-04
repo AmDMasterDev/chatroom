@@ -525,6 +525,7 @@ fetch('/api/newSeries')
   radialGradient.updateSeries(newSeries);
 });
 radialGradient.render();
+
 area.render();
 candle.render();
 bar.render();
