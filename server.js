@@ -251,8 +251,8 @@ function ensureAuthenticated(req, res, next) {
 
 db.serialize(function() {
   db.run("CREATE TABLE IF NOT EXISTS students (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT UNIQUE, password TEXT, rollno TEXT, collegeyear TEXT, div TEXT)");
-  db.run("CREATE TABLE IF NOT EXISTS attendance (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER, date DATE, is_present BOOLEAN, subject TEXT)")
-
+  db.run("CREATE TABLE IF NOT EXISTS attendance (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id INTEGER, date DATE, is_present BOOLEAN, subject TEXT)");
+  db.run("CREATE TABLE IF NOT EXISTS tmtbl(days TEXT, lecture_no INTEGER, course_name VARCHAR(255) NOT NULL, start_time TEXT, end_time TEXT, credit_hours INT)");
   
 //   const stmt = db.prepare("INSERT INTO students (name, email, password) VALUES (?, ?, ?)");
 //   stmt.run("John Doe", "johndoe@example.com", bcrypt.hashSync("password", 10));
